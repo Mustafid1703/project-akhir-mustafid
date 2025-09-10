@@ -1,23 +1,115 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <title>Edit Data</title>
-    <link rel="stylesheet" href="edit.css">
+  <meta charset="UTF-8">
+  <title>Edit Data</title>
+  <style>
+    * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex; justify-content: center; align-items: center;
+      background: linear-gradient(135deg, #00c6ff, #0072ff);
+      color: #fff; transition: background 0.5s, color 0.5s;
+    }
+    .card {
+      background: rgba(255,255,255,0.1);
+      padding: 30px;
+      border-radius: 14px;
+      width: 320px;
+      text-align: center;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+      backdrop-filter: blur(8px);
+      animation: fadeIn 0.7s ease;
+    }
+    h2 {
+      margin-bottom: 20px;
+      text-shadow: 1px 1px 4px rgba(0,0,0,0.3);
+    }
+    input {
+      width: 90%; padding: 12px;
+      margin: 10px 0;
+      border: none; border-radius: 8px;
+      outline: none; font-size: 14px;
+    }
+    button {
+      padding: 10px 18px; margin: 8px;
+      border: none; border-radius: 8px;
+      font-weight: bold; cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.3s;
+    }
+    button:hover {
+      transform: scale(1.07);
+      box-shadow: 0 0 15px rgba(255,255,255,0.6);
+    }
+    .save-btn { background: #4CAF50; color: #fff; }
+    .cancel-btn { background: #f44336; color: #fff; }
+    .mode-btn { background: #ff9800; color: #fff; margin-top: 15px; }
+
+    /* Dark Mode */
+    .dark-mode {
+      background: #0d0d0d;
+      color: #eee;
+    }
+    .dark-mode .card {
+      background: rgba(255,255,255,0.05);
+    }
+    .dark-mode input {
+      background: #222; color: #eee;
+    }
+
+    /* Animasi */
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(15px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Ubah Data Diri</h2>
-        <div class="form-input">
-            <input type="text" id="edit-name" placeholder="Nama">
-            <input type="number" id="edit-age" placeholder="Umur">
-            <input type="text" id="edit-origin" placeholder="Asal">
-            <input type="date" id="edit-birthdate">
-            <button id="save-btn">Simpan</button>
-            <button onclick="window.location.href='index.html'" class="cancel-btn">Batal</button>
-        </div>
-    </div>
+  <div class="card">
+    <h2>✏️ Edit Data</h2>
+    <form id="editForm">
+      <input type="text" id="editNama" placeholder="Nama" required>
+      <input type="text" id="editAsal" placeholder="Asal" required>
+      <input type="number" id="editUmur" placeholder="Umur" required>
+      <div>
+        <button type="submit" class="save-btn">💾 Simpan</button>
+        <button type="button" class="cancel-btn" onclick="batal()">❌ Batal</button>
+      </div>
+    </form>
+    <button class="mode-btn" onclick="toggleDarkMode()">🌙 / ☀️ Mode</button>
+  </div>
 
-    <script src="edit.js"></script>
+  <script>
+    let dataList = JSON.parse(localStorage.getItem("dataList")) || [];
+    let editIndex = localStorage.getItem("editIndex");
+
+    if(editIndex !== null && dataList[editIndex]) {
+      document.getElementById("editNama").value = dataList[editIndex].nama;
+      document.getElementById("editAsal").value = dataList[editIndex].asal;
+      document.getElementById("editUmur").value = dataList[editIndex].umur;
+    }
+
+    document.getElementById("editForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      dataList[editIndex] = {
+        nama: document.getElementById("editNama").value,
+        asal: document.getElementById("editAsal").value,
+        umur: document.getElementById("editUmur").value
+      };
+      localStorage.setItem("dataList", JSON.stringify(dataList));
+      localStorage.removeItem("editIndex");
+      window.location.href = "index.html";
+    });
+
+    function batal() {
+      localStorage.removeItem("editIndex");
+      window.location.href = "index.html";
+    }
+
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark-mode");
+    }
+  </script>
 </body>
 </html>

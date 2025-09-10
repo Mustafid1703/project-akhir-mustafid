@@ -1,37 +1,197 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <title>Form Data Diri</title>
-    <link rel="stylesheet" href="tugas.css">
+  <meta charset="UTF-8">
+  <title>Data Manager Premium</title>
+  <style>
+    * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+    body {
+      margin: 0; padding: 30px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+      transition: background 0.5s, color 0.5s;
+    }
+    h1 {
+      text-align: center;
+      font-size: 30px;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 8px rgba(0,0,0,0.4);
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+    }
+    .top-bar {
+      display: flex; justify-content: flex-end; margin-bottom: 20px;
+    }
+    button {
+      padding: 10px 16px;
+      margin: 4px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: transform 0.2s, box-shadow 0.3s;
+    }
+    button:hover {
+      transform: scale(1.07);
+      box-shadow: 0 0 15px rgba(255,255,255,0.7);
+    }
+    .form-card {
+      background: rgba(255,255,255,0.12);
+      padding: 20px;
+      border-radius: 15px;
+      backdrop-filter: blur(8px);
+      margin-bottom: 25px;
+      text-align: center;
+      animation: fadeIn 0.6s ease;
+    }
+    input {
+      padding: 12px;
+      margin: 8px;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      width: 180px;
+      font-size: 14px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      border-radius: 12px;
+      overflow: hidden;
+      animation: fadeIn 0.6s ease;
+    }
+    th, td {
+      padding: 14px;
+      text-align: center;
+    }
+    th {
+      background: rgba(0,0,0,0.4);
+      font-size: 16px;
+    }
+    tr {
+      transition: background 0.3s ease;
+    }
+    tr:hover {
+      background: rgba(255,255,255,0.15);
+    }
+    tr:nth-child(even) {
+      background: rgba(255,255,255,0.08);
+    }
+
+    /* Tombol Warna */
+    .add-btn { background: #4CAF50; color: #fff; }
+    .edit-btn { background: #2196F3; color: #fff; }
+    .delete-btn { background: #f44336; color: #fff; }
+    .mode-btn { background: blue; color: #fff; }
+
+    /* Mode Gelap */
+    .dark-mode {
+      background: #0d0d0d;
+      color: #eee;
+    }
+    .dark-mode .form-card {
+      background: rgba(255,255,255,0.05);
+    }
+    .dark-mode table {
+      background: rgba(255,255,255,0.04);
+    }
+    .dark-mode th {
+      background: rgba(255,255,255,0.12);
+    }
+    .dark-mode input {
+      background: #222; color: #eee;
+    }
+
+    /* Animasi */
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(10px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Input Data Diri</h2>
-        <div class="form-input">
-            <input type="text" id="name" placeholder="Nama">
-            <input type="number" id="age" placeholder="Umur">
-            <input type="text" id="origin" placeholder="Asal">
-            <input type="date" id="birthdate">
-            <button id="add-btn">Tambah</button>
-        </div>
+  <div class="container">
+    <h1>📋 Data Manager Premium</h1>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Nama</th>
-                    <th>Umur</th>
-                    <th>Asal</th>
-                    <th>Tanggal Lahir</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody id="data-table">
-                <!-- Data akan ditampilkan di sini -->
-            </tbody>
-        </table>
+    <div class="top-bar">
+      <button type="button" class="mode-btn" onclick="toggleDarkMode()">🌙 / ☀️ Mode</button>
     </div>
 
-    <script src="tugas.js"></script>
+    <div class="form-card">
+      <form id="dataForm">
+        <input type="text" id="nama" placeholder="Nama" required>
+        <input type="text" id="asal" placeholder="Asal" required>
+        <input type="number" id="umur" placeholder="Umur" required>
+        <button type="submit" class="add-btn">+ Tambah Data</button>
+      </form>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Nama</th>
+          <th>Asal</th>
+          <th>Umur</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="dataBody"></tbody>
+    </table>
+  </div>
+
+  <script>
+    const form = document.getElementById("dataForm");
+    const tbody = document.getElementById("dataBody");
+
+    let dataList = JSON.parse(localStorage.getItem("dataList")) || [];
+
+    function renderTable() {
+      tbody.innerHTML = "";
+      dataList.forEach((data, index) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${data.nama}</td>
+          <td>${data.asal}</td>
+          <td>${data.umur}</td>
+          <td>
+            <button class="edit-btn" onclick="editData(${index})">✏️ Edit</button>
+            <button class="delete-btn" onclick="deleteData(${index})">🗑 Hapus</button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    form.addEventListener("submit", function(e) {
+      e.preventDefault();
+      const nama = document.getElementById("nama").value;
+      const asal = document.getElementById("asal").value;
+      const umur = document.getElementById("umur").value;
+
+      dataList.push({ nama, asal, umur });
+      localStorage.setItem("dataList", JSON.stringify(dataList));
+      renderTable();
+      form.reset();
+    });
+
+    function deleteData(index) {
+      dataList.splice(index, 1);
+      localStorage.setItem("dataList", JSON.stringify(dataList));
+      renderTable();
+    }
+
+    function editData(index) {
+      localStorage.setItem("editIndex", index);
+      window.location.href = "edit.html";
+    }
+
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark-mode");
+    }
+
+    renderTable();
+  </script>
 </body>
 </html>
